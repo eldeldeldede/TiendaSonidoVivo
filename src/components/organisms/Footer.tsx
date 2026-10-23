@@ -1,16 +1,19 @@
 import React from 'react';
 
-// Organismo: Pie de página común a todo el sitio web
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-dark text-white pt-5 pb-4 mt-auto border-top border-secondary">
+    <footer 
+      className="bg-dark text-white pt-5 pb-4 mt-auto border-top border-secondary"
+      style={{ color: '#ffffff' }}
+    >
       <div className="container text-center text-md-start">
         <div className="row text-center text-md-start">
+          
           <div className="col-md-5 col-lg-5 col-xl-5 mx-auto mt-3">
             <h5 className="text-uppercase mb-4 fw-bold text-primary">
               <i className="bi bi-music-note-list me-2"></i>Sonido Vivo
             </h5>
-            <p className="text-white small pe-lg-4">
+            <p className="text-white small pe-lg-4" style={{ color: '#ffffff !important' }}>
               Tu tienda especializada en instrumentos musicales, equipos de audio e iluminación profesional. Calidad y servicio garantizado.
             </p>
           </div>
