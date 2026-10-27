@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { UserTable } from '../components/organisms/UserTable';
-import type { Order, Product, UserRole } from '../types';
+import type { Order, UserRole } from '../types';
 
 export const AdminPage: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'pedidos' | 'stock' | 'usuarios'>('pedidos');
 
-  const [orders, setOrders] = useState<Order[]>(() => {
+  const [orders] = useState<Order[]>(() => {
     const saved = localStorage.getItem('pedidos_sonidovivo');
     return saved ? JSON.parse(saved) : [
       { id: 'PED-101', cliente: 'Carlos Pérez', fecha: '2026-09-07', total: 750000, estado: 'En Preparación' },

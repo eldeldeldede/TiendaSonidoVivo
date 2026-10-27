@@ -1,16 +1,14 @@
 import React from 'react';
 import type { Product } from '../../types';
-import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
+  onAddToCart: (product: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart } = useCart();
-
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const handleAddToCart = () => {
-    addToCart(product);
+    onAddToCart(product);
     alert(`¡${product.nombre} ha sido agregado al carrito!`);
   };
 
