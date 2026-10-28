@@ -10,6 +10,9 @@ import { ServiciosPage } from './pages/ServiciosPage';
 import { MapaPage } from './pages/MapaPage';
 import { AdminPage } from './pages/AdminPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { CompraExitosaPage } from './pages/CompraExitosaPage';
+import { CompraErrorPage } from './pages/CompraErrorPage';
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
@@ -31,6 +34,9 @@ export const App: React.FC = () => {
           <Route path="/producto/:id" element={<ProductDetailPage />} />
           <Route path="/servicios" element={<ServiciosPage />} />
           <Route path="/mapa" element={<MapaPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/compra/exitosa" element={<CompraExitosaPage />} />
+          <Route path="/compra/error" element={<CompraErrorPage />} />
           <Route
             path="/admin"
             element={
