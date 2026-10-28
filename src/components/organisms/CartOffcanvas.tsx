@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import type { CartItem } from '../../types';
 
@@ -9,6 +10,12 @@ interface CartOffcanvasProps {
 
 export const CartOffcanvas: React.FC<CartOffcanvasProps> = ({ isOpen, onClose }) => {
   const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart();
+  const navigate = useNavigate();
+
+  const irAPagar = () => {
+    onClose();
+    navigate('/checkout');
+  };
 
   if (!isOpen) return null;
 
@@ -46,7 +53,7 @@ export const CartOffcanvas: React.FC<CartOffcanvasProps> = ({ isOpen, onClose })
             <span>Total:</span>
             <span>${total.toLocaleString()}</span>
           </div>
-          <button className="btn btn-warning w-100 mb-2">Proceder al Pago</button>
+          <button className="btn btn-warning w-100 mb-2" onClick={irAPagar}>Proceder al Pago</button>
           <button className="btn btn-outline-danger w-100" onClick={clearCart}>Vaciar Carrito</button>
         </div>
       )}

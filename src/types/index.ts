@@ -36,6 +36,13 @@ export interface Order {
   fecha: string;
   total: number;
   estado: 'En Preparación' | 'Despachado' | 'Entregado';
+  // Campos opcionales que se llenan al comprar desde el checkout (boleta)
+  rut?: string;
+  email?: string;
+  direccion?: string;
+  items?: CartItem[];
+  neto?: number;
+  iva?: number;
 }
 
 // Representa un artículo de la sección "Novedades"
