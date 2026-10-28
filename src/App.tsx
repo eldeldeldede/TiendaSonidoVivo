@@ -9,6 +9,7 @@ import { NosotrosPage } from './pages/NosotrosPage';
 import { ServiciosPage } from './pages/ServiciosPage';
 import { MapaPage } from './pages/MapaPage';
 import { AdminPage } from './pages/AdminPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
@@ -27,6 +28,7 @@ export const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/novedades" element={<NovedadesPage />} />
           <Route path="/nosotros" element={<NosotrosPage />} />
+          <Route path="/producto/:id" element={<ProductDetailPage />} />
           <Route path="/servicios" element={<ServiciosPage />} />
           <Route path="/mapa" element={<MapaPage />} />
           <Route

@@ -4,35 +4,18 @@ import { SearchBar } from '../components/molecules/SearchBar';
 import { ProductCard } from '../components/molecules/ProductCard';
 import { useCart } from '../context/CartContext';
 import type { Product } from '../types';
-
-const initialProducts: Product[] = [
-  { id: 1, nombre: 'Guitarra Eléctrica Fender Stratocaster', categoria: 'Guitarras', precio: 750000, stock: 5, img: 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?auto=format&fit=crop&w=400&q=80' },
-  { id: 2, nombre: 'Teclado Roland XPS-10', categoria: 'Teclados', precio: 620000, stock: 2, img: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=400&q=80' },
-  { id: 3, nombre: 'Batería Acústica Pearl Roadshow', categoria: 'Baterías', precio: 580000, stock: 0, img: 'https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?auto=format&fit=crop&w=400&q=80' },
-  { id: 4, nombre: 'Pedal de Efectos Boss DS-1', categoria: 'Accesorios', precio: 85000, stock: 12, img: 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?auto=format&fit=crop&w=400&q=80' }
-];
+import { obtenerProductos, filtrarProductos, obtenerCategorias } from '../data/productos';
 
 export const HomePage: React.FC = () => {
-  const [products] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('productos_sonidovivo');
-    if (!saved) {
-      localStorage.setItem('productos_sonidovivo', JSON.stringify(initialProducts));
-      return initialProducts;
-    }
-    return JSON.parse(saved);
-  });
+  const [products] = useState<Product[]>(() => obtenerProductos());
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todas');
   const { addToCart } = useCart();
 
-  const categories = Array.from(new Set(products.map((p) => p.categoria)));
+  const categories = obtenerCategorias(products);
 
-  const filteredProducts = products.filter((p) => {
-    const matchName = p.nombre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCat = selectedCategory === 'todas' || p.categoria === selectedCategory;
-    return matchName && matchCat;
-  });
+  const filteredProducts = filtrarProductos(products, searchTerm, selectedCategory);
 
   return (
     <StoreTemplate>
