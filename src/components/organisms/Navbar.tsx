@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -11,10 +11,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
   const { currentUser, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const cerrarMenu = () => setMenuAbierto(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleLogout = () => {
+    cerrarMenu();
     logout();
     navigate('/login');
   };
@@ -29,42 +32,43 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
         <button
           className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
+          aria-label="Abrir menú"
+          aria-expanded={menuAbierto}
+          onClick={() => setMenuAbierto(!menuAbierto)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <div className={`collapse navbar-collapse ${menuAbierto ? 'show' : ''}`} id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/">
+              <Link className="nav-link" to="/" onClick={cerrarMenu}>
                 Inicio
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/nosotros">
+              <Link className="nav-link" to="/nosotros" onClick={cerrarMenu}>
                 Nosotros
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/servicios">
+              <Link className="nav-link" to="/servicios" onClick={cerrarMenu}>
                 Servicios
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/novedades">
+              <Link className="nav-link" to="/novedades" onClick={cerrarMenu}>
                 Novedades
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/mapa">
+              <Link className="nav-link" to="/mapa" onClick={cerrarMenu}>
                 Puntos de Retiro
               </Link>
             </li>
             {currentUser?.rol === 'Administrador' && (
               <li className="nav-item">
-                <Link className="nav-link text-info fw-semibold" to="/admin">
+                <Link className="nav-link text-info fw-semibold" to="/admin" onClick={cerrarMenu}>
                   Panel Admin
                 </Link>
               </li>
