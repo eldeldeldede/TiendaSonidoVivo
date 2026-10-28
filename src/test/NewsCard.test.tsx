@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Order } from '../../types';
+import type { Order } from '../types';
 
 interface BoletaProps {
   pedido: Order;
