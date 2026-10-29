@@ -11,10 +11,11 @@ import {
   actualizarProducto,
   eliminarProducto,
 } from '../data/productos';
-import type { Order, Product, UserRole } from '../types';
+import { RegisterForm } from '../components/organisms/FormularioRegistro';
+import type { Order, Product, User, UserRole } from '../types';
 
 export const AdminPage: React.FC = () => {
-  const { currentUser, logout, users, cambiarRol } = useAuth();
+  const { currentUser, logout, users, cambiarRol, register } = useAuth();
   const [activeTab, setActiveTab] = useState<'pedidos' | 'stock' | 'usuarios'>('pedidos');
 
   const [orders] = useState<Order[]>(() => {
@@ -64,9 +65,21 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  // ---------- Usuarios ----------
+    // ---------- Usuarios ----------
+  const [mostrarFormUsuario, setMostrarFormUsuario] = useState(false);
+
   const handleRoleChange = (index: number, newRole: UserRole) => {
-      cambiarRol(users[index].run, newRole);
+    cambiarRol(users[index].run, newRole);
+  };
+
+  const crearUsuario = (nuevoUsuario: User) => {
+    if (currentUser?.rol !== 'Administrador') return; // solo el admin puede crear usuarios
+    if (register(nuevoUsuario)) {
+      window.alert(`Usuario ${nuevoUsuario.nombre} creado como ${nuevoUsuario.rol}`);
+      setMostrarFormUsuario(false);
+    } else {
+      window.alert('Ya existe un usuario con ese RUN o correo electrónico');
+    }
   };
 
   return (
@@ -158,10 +171,43 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'usuarios' && currentUser?.rol === 'Administrador' && (
+                {activeTab === 'usuarios' && currentUser?.rol === 'Administrador' && (
           <div className="card border-0 shadow-sm p-3 border-top border-danger border-3">
-            <h5 className="text-danger mb-3">Gestión de Usuarios del Sistema</h5>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="text-danger mb-0">Gestión de Usuarios del Sistema</h5>
+              <Button variant="danger" onClick={() => setMostrarFormUsuario(true)}>
+                + Nuevo usuario
+              </Button>
+            </div>
+
             <UserTable users={users} onRoleChange={handleRoleChange} />
+          </div>
+        )}
+
+        {/* Modal para crear usuario: se muestra según el estado mostrarFormUsuario */}
+        {mostrarFormUsuario && (
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+            onClick={() => setMostrarFormUsuario(false)}
+          >
+            <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title fw-bold">Nuevo usuario</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Cerrar"
+                    onClick={() => setMostrarFormUsuario(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <RegisterForm onRegister={crearUsuario} permitirElegirRol textoBoton="Crear usuario" />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

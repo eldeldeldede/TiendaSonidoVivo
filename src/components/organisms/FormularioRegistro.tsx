@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import type { User } from '../../types';
+import type { User, UserRole } from '../../types';
 import { Input } from '../atoms/Input';
+import { Select} from '../atoms/Select';
 import { Button } from '../atoms/Button';
 import { validarEmail, validarRut } from '../../utils/validaciones';
 
