@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User } from '../types';
+import type { User, UserRole   } from '../types';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -7,6 +7,8 @@ interface AuthContextType {
   register: (newUser: User) => boolean;
   logout: () => void;
   users: User[];
+  cambiarRol: (run: string, nuevoRol: UserRole) => void;
+
 }
 
 const defaultUsers: User[] = [
@@ -90,8 +92,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCurrentUser(null);
   };
 
+   const cambiarRol = (run: string, nuevoRol: UserRole) => {
+    setUsers((prev) => prev.map((u) => (u.run === run ? { ...u, rol: nuevoRol } : u)));
+    setCurrentUser((actual) => (actual && actual.run === run ? { ...actual, rol: nuevoRol } : actual));
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, login, register, logout, users }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout, users, cambiarRol }}>
       {children}
     </AuthContext.Provider>
   );

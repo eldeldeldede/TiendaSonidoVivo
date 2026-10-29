@@ -14,7 +14,7 @@ import {
 import type { Order, Product, UserRole } from '../types';
 
 export const AdminPage: React.FC = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, users, cambiarRol } = useAuth();
   const [activeTab, setActiveTab] = useState<'pedidos' | 'stock' | 'usuarios'>('pedidos');
 
   const [orders] = useState<Order[]>(() => {
@@ -23,11 +23,6 @@ export const AdminPage: React.FC = () => {
       { id: 'PED-101', cliente: 'Carlos Pérez', fecha: '2026-09-07', total: 750000, estado: 'En Preparación' },
       { id: 'PED-102', cliente: 'María González', fecha: '2026-09-06', total: 85000, estado: 'Despachado' }
     ];
-  });
-
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem('usuarios_sonidovivo');
-    return saved ? JSON.parse(saved) : [];
   });
 
   // ---------- Productos (CRUD) ----------
@@ -71,10 +66,7 @@ export const AdminPage: React.FC = () => {
 
   // ---------- Usuarios ----------
   const handleRoleChange = (index: number, newRole: UserRole) => {
-    const updatedUsers = [...users];
-    updatedUsers[index].rol = newRole;
-    setUsers(updatedUsers);
-    localStorage.setItem('usuarios_sonidovivo', JSON.stringify(updatedUsers));
+      cambiarRol(users[index].run, newRole);
   };
 
   return (
