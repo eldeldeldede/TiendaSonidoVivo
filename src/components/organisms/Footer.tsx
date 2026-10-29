@@ -22,10 +22,10 @@ export const Footer: React.FC = () => {
           <div className="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
             <h6 className="text-uppercase mb-4 fw-bold text-light">Navegación</h6>
             <p className="mb-2"><Link to="/" className="text-white text-decoration-none">Catálogo</Link></p>
-            <p className="mb-2"><Link to="/novedades" className="text-white text-decoration-none">Novedades</Link></p>
-            <p className="mb-2"><Link to="/mapa" className="text-white text-decoration-none">Puntos de Retiro</Link></p>
             <p className="mb-2"><Link to="/nosotros" className="text-white text-decoration-none">Nosotros</Link></p>
             <p className="mb-2"><Link to="/servicios" className="text-white text-decoration-none">Servicios</Link></p>
+            <p className="mb-2"><Link to="/novedades" className="text-white text-decoration-none">Novedades</Link></p>
+            <p className="mb-2"><Link to="/mapa" className="text-white text-decoration-none">Puntos de Retiro</Link></p>
           </div>
 
           <div className="col-md-4 col-lg-4 col-xl-4 mx-auto mt-3">
