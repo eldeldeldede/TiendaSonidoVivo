@@ -66,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
                 Puntos de Retiro
               </Link>
             </li>
-            {currentUser?.rol === 'Administrador' && (
+            {(currentUser?.rol === 'Administrador' || currentUser?.rol === 'Vendedor') && (
               <li className="nav-item">
                 <Link className="nav-link text-info fw-semibold" to="/admin" onClick={cerrarMenu}>
                   Panel Admin

@@ -11,6 +11,7 @@ import {
   actualizarProducto,
   eliminarProducto,
 } from '../data/productos';
+import { obtenerPedidos, actualizarEstadoPedido } from '../data/pedidos';
 import { RegisterForm } from '../components/organisms/FormularioRegistro';
 import type { Order, Product, User, UserRole } from '../types';
 
@@ -18,13 +19,15 @@ export const AdminPage: React.FC = () => {
   const { currentUser, logout, users, cambiarRol, register } = useAuth();
   const [activeTab, setActiveTab] = useState<'pedidos' | 'stock' | 'usuarios'>('pedidos');
 
-  const [orders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('pedidos_sonidovivo');
-    return saved ? JSON.parse(saved) : [
-      { id: 'PED-101', cliente: 'Carlos Pérez', fecha: '2026-09-07', total: 750000, estado: 'En Preparación' },
-      { id: 'PED-102', cliente: 'María González', fecha: '2026-09-06', total: 85000, estado: 'Despachado' }
-    ];
-  });
+  const [orders, setOrders] = useState<Order[]>(() => obtenerPedidos());
+
+  const cambiarEstado = (id: string, estado: Order['estado']) => {
+    actualizarEstadoPedido(id, estado);
+    setOrders(obtenerPedidos());
+  };
+
+  const colorEstado = (estado: Order['estado']) =>
+    estado === 'Entregado' ? 'bg-success' : estado === 'Despachado' ? 'bg-primary' : 'bg-warning text-dark';
 
   // ---------- Productos (CRUD) ----------
   const [productos, setProductos] = useState<Product[]>(() => obtenerProductos());
@@ -65,7 +68,7 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-    // ---------- Usuarios ----------
+  // ---------- Usuarios ----------
   const [mostrarFormUsuario, setMostrarFormUsuario] = useState(false);
 
   const handleRoleChange = (index: number, newRole: UserRole) => {
@@ -127,6 +130,7 @@ export const AdminPage: React.FC = () => {
                     <th>Cliente</th>
                     <th>Total</th>
                     <th>Estado</th>
+                    <th>Cambiar estado</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -135,7 +139,18 @@ export const AdminPage: React.FC = () => {
                       <td>{o.id}</td>
                       <td>{o.cliente}</td>
                       <td>${o.total.toLocaleString('es-CL')}</td>
-                      <td><span className="badge bg-warning text-dark">{o.estado}</span></td>
+                      <td><span className={`badge ${colorEstado(o.estado)}`}>{o.estado}</span></td>
+                      <td>
+                        <select
+                          className="form-select form-select-sm w-auto"
+                          value={o.estado}
+                          onChange={(e) => cambiarEstado(o.id, e.target.value as Order['estado'])}
+                        >
+                          <option value="En Preparación">En Preparación</option>
+                          <option value="Despachado">Despachado</option>
+                          <option value="Entregado">Entregado</option>
+                        </select>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -171,7 +186,7 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-                {activeTab === 'usuarios' && currentUser?.rol === 'Administrador' && (
+        {activeTab === 'usuarios' && currentUser?.rol === 'Administrador' && (
           <div className="card border-0 shadow-sm p-3 border-top border-danger border-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="text-danger mb-0">Gestión de Usuarios del Sistema</h5>

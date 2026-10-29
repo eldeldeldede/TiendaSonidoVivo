@@ -78,3 +78,14 @@ export function crearPedido(cliente: DatosCliente, items: CartItem[]): Order {
   guardar([...pedidos, nuevo]);
   return nuevo;
 }
+
+// Actualizar: cambia el estado de un pedido (lo usan Administrador y Vendedor)
+export function actualizarEstadoPedido(id: string, estado: Order['estado']): Order | undefined {
+  const pedidos = leer();
+  const existente = pedidos.find((p) => p.id === id);
+  if (!existente) return undefined;
+
+  const actualizado: Order = { ...existente, estado };
+  guardar(pedidos.map((p) => (p.id === id ? actualizado : p)));
+  return actualizado;
+}
