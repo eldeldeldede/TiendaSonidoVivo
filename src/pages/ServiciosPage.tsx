@@ -1,6 +1,6 @@
 import React from 'react';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { ContactForm, type DatosContacto } from '../components/organisms/ContactForm';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { ContactForm, type DatosContacto } from '../components/organisms/FormularioContacto';
 
 const servicios = [
   { icono: 'tools', titulo: 'Reparación y mantención', texto: 'Calibración de guitarras y bajos, cambio de cuerdas, ajuste de alma y reparación de equipos de audio.' },

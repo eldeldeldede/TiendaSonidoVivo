@@ -1,6 +1,6 @@
 import React from 'react';
 import type { NewsArticle } from '../../types';
-import { Badge } from '../atoms/Badge';
+import { Badge } from '../atoms/Etiqueta';
 import { Button } from '../atoms/Button';
 
 interface NewsCardProps {

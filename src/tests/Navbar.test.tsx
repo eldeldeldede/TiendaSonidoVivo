@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider } from '../context/ContenidoLogin';
 import { CartProvider } from '../context/CartContext';
 import { Navbar } from '../components/organisms/Navbar';
 

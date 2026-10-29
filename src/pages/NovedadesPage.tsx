@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { NewsCard } from '../components/molecules/NewsCard';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { NewsCard } from '../components/molecules/CardNovedades';
 import { novedades } from '../data/novedades';
 import type { NewsArticle } from '../types';
 

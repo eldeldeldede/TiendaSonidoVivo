@@ -1,6 +1,6 @@
 import React from 'react';
 import type { User, UserRole } from '../../types';
-import { Badge } from '../atoms/Badge';
+import { Badge } from '../atoms/Etiqueta';
 
 interface UserTableProps {
   users: User[];

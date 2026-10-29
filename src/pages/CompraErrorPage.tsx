@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
 
 export const CompraErrorPage: React.FC = () => {
   return (

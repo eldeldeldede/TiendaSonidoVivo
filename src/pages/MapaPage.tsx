@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
 
 interface Sucursal {
   id: number;

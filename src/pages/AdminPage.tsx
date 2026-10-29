@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { UserTable } from '../components/organisms/UserTable';
-import { ProductTable } from '../components/organisms/ProductTable';
-import { ProductForm, type ProductFormData } from '../components/organisms/ProductForm';
+import { useAuth } from '../context/ContenidoLogin';
+import { UserTable } from '../components/organisms/PanelUsuariosAdmin';
+import { ProductTable } from '../components/organisms/InventarioProductos';
+import { ProductForm, type ProductFormData } from '../components/organisms/FormularioNewProducto';
 import { Button } from '../components/atoms/Button';
 import {
   obtenerProductos,

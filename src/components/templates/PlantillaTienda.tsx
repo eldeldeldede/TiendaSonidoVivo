@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navbar } from '../organisms/Navbar';
-import { CartOffcanvas } from '../organisms/CartOffcanvas';
+import { CartOffcanvas } from '../organisms/CarritoCompras';
 import { Footer } from '../organisms/Footer';
 
 interface StoreTemplateProps {

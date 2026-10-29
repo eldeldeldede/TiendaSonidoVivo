@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { Boleta } from '../components/organisms/Boleta';
 import type { Order } from '../types';
 

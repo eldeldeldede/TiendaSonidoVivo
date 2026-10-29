@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { LoginForm } from '../components/organisms/LoginForm';
-import { RegisterForm } from '../components/organisms/RegisterForm';
-import { useAuth } from '../context/AuthContext';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { LoginForm } from '../components/organisms/FormularioLogin';
+import { RegisterForm } from '../components/organisms/FormularioRegistro';
+import { useAuth } from '../context/ContenidoLogin';
 import type { User } from '../types';
 
 export const LoginPage: React.FC = () => {

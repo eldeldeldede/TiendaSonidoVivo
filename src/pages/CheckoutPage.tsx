@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { CheckoutForm } from '../components/organisms/CheckoutForm';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { CheckoutForm } from '../components/organisms/FormularioPago';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/ContenidoLogin';
 import { calcularTotales, crearPedido, simularPago, type DatosCliente } from '../data/pedidos';
 
 export const CheckoutPage: React.FC = () => {

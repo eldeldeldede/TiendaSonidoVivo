@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { SearchBar } from '../components/molecules/SearchBar';
-import { ProductCard } from '../components/molecules/ProductCard';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { SearchBar } from '../components/molecules/BarraBusqueda';
+import { ProductCard } from '../components/molecules/CardProductos';
 import { useCart } from '../context/CartContext';
 import type { Product } from '../types';
 import { obtenerProductos, filtrarProductos, obtenerCategorias } from '../data/productos';

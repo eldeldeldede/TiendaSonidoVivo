@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { StoreTemplate } from '../components/templates/StoreTemplate';
-import { Badge } from '../components/atoms/Badge';
+import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { Badge } from '../components/atoms/Etiqueta';
 import { Button } from '../components/atoms/Button';
 import { useCart } from '../context/CartContext';
 import { obtenerProductoPorId } from '../data/productos';
