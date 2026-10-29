@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import type { User, UserRole } from '../../types';
 import { Input } from '../atoms/Input';
-import { Select} from '../atoms/Select';
+import { Select } from '../atoms/Select';
 import { Button } from '../atoms/Button';
 import { validarEmail, validarRut } from '../../utils/validaciones';
 
 interface RegisterFormProps {
   onRegister: (nuevoUsuario: User) => void;
+  permitirElegirRol?: boolean; // true solo en el panel admin
+  textoBoton?: string;
 }
 
-// Organismo: formulario de registro. Todo usuario nuevo queda como "Cliente".
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
+const ROLES: UserRole[] = ['Cliente', 'Vendedor', 'Administrador'];
+
+// Organismo: formulario de registro. En el login todo usuario nuevo queda como "Cliente";
+// en el panel admin se reutiliza con permitirElegirRol para crear usuarios con cualquier rol.
+export const RegisterForm: React.FC<RegisterFormProps> = ({
+  onRegister,
+  permitirElegirRol = false,
+  textoBoton = 'Registrar Cuenta',
+}) => {
   const [run, setRun] = useState('');
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [confirmarPass, setConfirmarPass] = useState('');
+  const [rol, setRol] = useState<UserRole>('Cliente');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,7 +70,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
       apellidos: apellidos.trim(),
       email: email.trim(),
       pass,
-      rol: 'Cliente',
+      rol,
     });
   };
 
@@ -78,8 +88,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
       <Input id="reg-email" label="Correo Electrónico" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <Input id="reg-pass" label="Contraseña" type="password" helperText="mínimo 8 caracteres" value={pass} onChange={(e) => setPass(e.target.value)} />
       <Input id="reg-confirmar" label="Confirmar Contraseña" type="password" value={confirmarPass} onChange={(e) => setConfirmarPass(e.target.value)} />
+      {permitirElegirRol && (
+        <Select
+          id="reg-rol"
+          label="Rol"
+          options={ROLES.map((r) => ({ value: r, label: r }))}
+          value={rol}
+          onChange={(e) => setRol(e.target.value as UserRole)}
+        />
+      )}
       <Button type="submit" variant="warning" className="w-100 fw-bold mt-2 py-2">
-        Registrar Cuenta
+        {textoBoton}
       </Button>
     </form>
   );
