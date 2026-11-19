@@ -7,6 +7,7 @@ import type { NewsArticle } from '../types';
 export const NovedadesPage: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
+  const novedadesOrdenadas = [...novedades].sort((a,b) => b.id - a.id);
   return (
     <StoreTemplate>
       <div className="text-center my-5">
@@ -16,7 +17,7 @@ export const NovedadesPage: React.FC = () => {
       </div>
 
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
-        {novedades.map((art) => (
+        {novedadesOrdenadas.map((art) => (
           <div key={art.id} className="col">
             <NewsCard article={art} onReadMore={setSelectedArticle} />
           </div>

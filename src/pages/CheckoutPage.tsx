@@ -1,4 +1,5 @@
-import React from 'react';
+// [CAMBIO] Se importó 'useState' para manejar mensajes de error en pantalla si falta stock
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { CheckoutForm } from '../components/organisms/FormularioPago';
@@ -10,10 +11,12 @@ export const CheckoutPage: React.FC = () => {
   const { cart, clearCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  
+  // [CAMBIO] Nuevo estado para guardar el texto de alerta si algún producto supera el stock
+  const [errorStock, setErrorStock] = useState<string | null>(null);
 
   const { neto, iva, total } = calcularTotales(cart);
 
-  // Si hay sesión iniciada, los datos se completan automáticamente
   const datosIniciales: Partial<DatosCliente> | undefined = currentUser
     ? {
         nombre: currentUser.apellidos ? `${currentUser.nombre} ${currentUser.apellidos}` : currentUser.nombre,
@@ -24,10 +27,24 @@ export const CheckoutPage: React.FC = () => {
     : undefined;
 
   const pagar = (cliente: DatosCliente, numeroTarjeta: string) => {
+    // [CAMBIO] Limpia errores anteriores cada vez que el usuario intenta pagar
+    setErrorStock(null);
+
+    // [CAMBIO] Busca si algún ítem del carrito tiene una cantidad mayor a su stock disponible
+    const productoSinStock = cart.find((item) => item.quantity > item.stock);
+    if (productoSinStock) {
+      // [CAMBIO] Muestra el mensaje de error y detiene el proceso de pago con 'return'
+      setErrorStock(
+        `No hay suficiente stock para "${productoSinStock.nombre}". Máximo disponible: ${productoSinStock.stock}.`
+      );
+      return;
+    }
+
     if (!simularPago(numeroTarjeta)) {
       navigate('/compra/error');
       return;
     }
+
     const pedido = crearPedido(cliente, cart);
     clearCart();
     navigate('/compra/exitosa', { state: { pedido } });
@@ -48,6 +65,14 @@ export const CheckoutPage: React.FC = () => {
   return (
     <StoreTemplate>
       <h1 className="fw-bold mb-4">Finalizar compra</h1>
+
+      {/* [CAMBIO] Muestra una alerta roja de Bootstrap en pantalla solo si 'errorStock' tiene un mensaje */}
+      {errorStock && (
+        <div className="alert alert-danger" role="alert">
+          {errorStock}
+        </div>
+      )}
+
       <div className="row g-4">
         <div className="col-lg-7">
           <div className="card bg-dark text-white border-secondary p-4">

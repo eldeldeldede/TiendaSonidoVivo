@@ -11,10 +11,11 @@ export const HomePage: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todas');
-  const { addToCart } = useCart();
+  
+  // [CAMBIO] Obtenemos 'cart' para pasarle a cada tarjeta cuántas unidades lleva el usuario
+  const { cart, addToCart } = useCart();
 
   const categories = obtenerCategorias(products);
-
   const filteredProducts = filtrarProductos(products, searchTerm, selectedCategory);
 
   return (
@@ -34,11 +35,22 @@ export const HomePage: React.FC = () => {
         />
 
         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-          {filteredProducts.map((product) => (
-            <div className="col" key={product.id}>
-              <ProductCard product={product} onAddToCart={addToCart} />
-            </div>
-          ))}
+          {filteredProducts.map((product) => {
+            // [CAMBIO] Buscamos si este producto ya está en el carrito para saber su cantidad actual
+            const itemEnCarrito = cart.find((item) => item.id === product.id);
+            const cantidadEnCarrito = itemEnCarrito ? itemEnCarrito.quantity : 0;
+
+            return (
+              <div className="col" key={product.id}>
+                {/* [CAMBIO] Le pasamos 'cantidadEnCarrito' a la tarjeta para que controle el límite visualmente */}
+                <ProductCard 
+                  product={product} 
+                  onAddToCart={addToCart} 
+                  cantidadEnCarrito={cantidadEnCarrito} 
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </StoreTemplate>

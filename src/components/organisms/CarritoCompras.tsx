@@ -25,38 +25,74 @@ export const CartOffcanvas: React.FC<CartOffcanvasProps> = ({ isOpen, onClose })
         <h5 className="offcanvas-title">Carrito de Compras</h5>
         <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
       </div>
-      <div className="offcanvas-body">
+      
+      {/* [CAMBIO] Se agregaron clases 'd-flex flex-column' para empujar el total y botones hacia abajo */}
+      <div className="offcanvas-body d-flex flex-column">
         {cart.length === 0 ? (
           <p className="text-center text-muted my-4">El carrito está vacío.</p>
         ) : (
-          <ul className="list-group list-group-flush mb-3">
-            {cart.map((item: CartItem) => (
-              <li key={item.id} className="list-group-item bg-dark text-white d-flex justify-content-between align-items-center border-secondary">
-                <div>
-                  <h6 className="my-0">{item.nombre}</h6>
-                  <small className="text-muted">${item.precio.toLocaleString()} c/u</small>
-                </div>
-                <div className="d-flex align-items-center gap-2">
-                  <button className="btn btn-sm btn-outline-light" onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button className="btn btn-sm btn-outline-light" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                  <button className="btn btn-sm btn-danger ms-2" onClick={() => removeFromCart(item.id)}>×</button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="list-group list-group-flush mb-3">
+              {cart.map((item: CartItem) => (
+                <li key={item.id} className="list-group-item bg-dark text-white d-flex justify-content-between align-items-center border-secondary">
+                  <div>
+                    <h6 className="my-0">{item.nombre}</h6>
+                    <small className="text-white-50 d-block">${item.precio.toLocaleString('es-CL')} c/u</small>
+                    
+                    {/* [CAMBIO] Se agregó esta etiqueta para que el usuario vea cuántas unidades quedan en stock */}
+                    <small className="text-warning" style={{ fontSize: '0.75rem' }}>
+                      Stock disponible: {item.stock}
+                    </small>
+                  </div>
+                  
+                  <div className="d-flex align-items-center gap-2">
+                    <button
+                      className="btn btn-sm btn-outline-light"
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    >
+                      -
+                    </button>
+                    <span>{item.quantity}</span>
+                    
+                    {/* [CAMBIO] Botón '+' con la propiedad 'disabled' para bloquear clics al llegar al límite de stock */}
+                    <button
+                      className="btn btn-sm btn-outline-light"
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      disabled={item.quantity >= item.stock}
+                    >
+                      +
+                    </button>
+                    
+                    {/* [CAMBIO] Se completó el cierre del componente que estaba cortado (botón eliminar, total y botones finales) */}
+                    <button
+                      className="btn btn-sm btn-outline-danger ms-1"
+                      onClick={() => removeFromCart(item.id)}
+                      title="Eliminar producto"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-auto border-top border-secondary pt-3">
+              <div className="d-flex justify-content-between fw-bold fs-5 mb-3">
+                <span>Total:</span>
+                <span>${total.toLocaleString('es-CL')}</span>
+              </div>
+              <div className="d-grid gap-2">
+                <button className="btn btn-warning fw-bold" onClick={irAPagar}>
+                  Ir a pagar
+                </button>
+                <button className="btn btn-outline-secondary btn-sm" onClick={clearCart}>
+                  Vaciar carrito
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
-      {cart.length > 0 && (
-        <div className="offcanvas-footer p-3 border-top border-secondary">
-          <div className="d-flex justify-content-between mb-3 fw-bold">
-            <span>Total:</span>
-            <span>${total.toLocaleString()}</span>
-          </div>
-          <button className="btn btn-warning w-100 mb-2" onClick={irAPagar}>Proceder al Pago</button>
-          <button className="btn btn-outline-danger w-100" onClick={clearCart}>Vaciar Carrito</button>
-        </div>
-      )}
     </div>
   );
 };
