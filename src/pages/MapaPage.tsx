@@ -1,45 +1,25 @@
 import React, { useState } from 'react';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
+import { EstadoCarga } from '../components/molecules/EstadoCarga';
+import { listarPuntosRetiro } from '../api/puntosRetiro';
+import { useCarga } from '../hooks/useCarga';
 
-interface Sucursal {
-  id: number;
-  nombre: string;
-  direccion: string;
-  horario: string;
-  lat: number;
-  lng: number;
-  mapaUrl: string;
-}
-
-const sucursales: Sucursal[] = [
-  {
-    id: 1,
-    nombre: 'Tienda Principal Sonido Vivo',
-    direccion: 'Av. Libertad 450, Viña del Mar',
-    horario: '10:00 - 19:00 hrs',
-    lat: -33.0183,
-    lng: -71.5511,
-    mapaUrl: 'https://maps.google.com/maps?q=-33.0183,-71.5511&z=15&output=embed'
-  },
-  {
-    id: 2,
-    nombre: 'Punto de Retiro Centro Viña',
-    direccion: 'Calle Valparaíso 680, Viña del Mar',
-    horario: '11:00 - 18:00 hrs',
-    lat: -33.0245,
-    lng: -71.5522,
-    mapaUrl: 'https://maps.google.com/maps?q=-33.0245,-71.5522&z=15&output=embed'
-  }
-];
+const urlMapa = (lat: number, lng: number) => `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
 
 export const MapaPage: React.FC = () => {
-  const [selectedSucursal, setSelectedSucursal] = useState<Sucursal>(sucursales[0]);
+  const { datos, cargando, error, recargar } = useCarga(listarPuntosRetiro);
+  const sucursales = datos ?? [];
+  const [seleccionadaId, setSeleccionadaId] = useState<number | null>(null);
+  // Mientras no se elija una, se muestra la primera (el backend entrega la principal primero)
+  const selectedSucursal = sucursales.find((s) => s.id === seleccionadaId) ?? sucursales[0];
 
   return (
     <StoreTemplate>
       <div className="container my-4">
         <h2 className="text-white mb-4">Puntos de Retiro y Sucursales</h2>
         
+        <EstadoCarga cargando={cargando} error={error} onReintentar={recargar}>
+        {selectedSucursal ? (
         <div className="row g-4">
           {/* Lista de Sucursales */}
           <div className="col-md-5">
@@ -56,7 +36,7 @@ export const MapaPage: React.FC = () => {
                       className={`list-group-item list-group-item-action bg-dark text-white border-secondary p-3 ${
                         selectedSucursal.id === sucursal.id ? 'active bg-secondary' : ''
                       }`}
-                      onClick={() => setSelectedSucursal(sucursal)}
+                      onClick={() => setSeleccionadaId(sucursal.id)}
                     >
                       <h5 className="mb-1 text-warning">{sucursal.nombre}</h5>
                       <p className="mb-1 text-light small">{sucursal.direccion}</p>
@@ -83,12 +63,16 @@ export const MapaPage: React.FC = () => {
                   style={{ border: 0, minHeight: '380px', borderRadius: '0 0 0.375rem 0.375rem' }}
                   loading="lazy"
                   allowFullScreen
-                  src={selectedSucursal.mapaUrl}
+                  src={urlMapa(selectedSucursal.lat, selectedSucursal.lng)}
                 ></iframe>
               </div>
             </div>
           </div>
         </div>
+        ) : (
+          <p className="text-white-50">Aún no hay puntos de retiro registrados.</p>
+        )}
+        </EstadoCarga>
       </div>
     </StoreTemplate>
   );

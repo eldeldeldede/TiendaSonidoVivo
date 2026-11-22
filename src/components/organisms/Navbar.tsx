@@ -66,6 +66,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
                 Puntos de Retiro
               </Link>
             </li>
+            {currentUser && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/mis-pedidos" onClick={cerrarMenu}>
+                  Mis pedidos
+                </Link>
+              </li>
+            )}
+            {currentUser && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/mis-consultas" onClick={cerrarMenu}>
+                  Mis consultas
+                </Link>
+              </li>
+            )}
             {(currentUser?.rol === 'Administrador' || currentUser?.rol === 'Vendedor') && (
               <li className="nav-item">
                 <Link className="nav-link text-info fw-semibold" to="/admin" onClick={cerrarMenu}>

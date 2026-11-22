@@ -1,31 +1,42 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { LoginForm } from '../components/organisms/FormularioLogin';
 import { RegisterForm } from '../components/organisms/FormularioRegistro';
 import { useAuth } from '../context/ContenidoLogin';
 import type { User } from '../types';
+import { mensajeDeError } from '../api/cliente';
 
 export const LoginPage: React.FC = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  // Si llegó desde el pago, después de iniciar sesión vuelve ahí (el carrito se conserva)
+  const desde = (useLocation().state as { desde?: string } | null)?.desde;
 
-  const handleLogin = (email: string, pass: string) => {
-    if (login(email, pass)) {
+  const handleLogin = async (email: string, pass: string) => {
+    try {
+      const usuario = await login(email, pass);
+      if (usuario.debeCambiarContrasena) {
+        // Primera vez con la contraseña temporal: debe cambiarla antes de usar la tienda
+        window.alert('Es tu primer inicio de sesión: debes cambiar la contraseña temporal por una propia.');
+        navigate('/cambiar-contrasena', { replace: true, state: { desde } });
+        return;
+      }
       window.alert('¡Inicio de sesión exitoso!');
-      navigate('/');
-    } else {
-      window.alert('Credenciales incorrectas. Verifique su correo y contraseña.');
+      navigate(desde ?? '/', { replace: true });
+    } catch (e) {
+      window.alert(mensajeDeError(e));
     }
   };
 
-  const handleRegister = (nuevoUsuario: User) => {
-    if (register(nuevoUsuario)) {
-      window.alert(`¡Registro exitoso, ${nuevoUsuario.nombre}! Ahora puede iniciar sesión.`);
+  const handleRegister = async (nuevoUsuario: User) => {
+    try {
+      await register(nuevoUsuario);
+      window.alert(`¡Registro exitoso, ${nuevoUsuario.nombre}! Te enviamos una contraseña temporal a ${nuevoUsuario.email}. Úsala para iniciar sesión.`);
       setIsRegisterMode(false);
-    } else {
-      window.alert('Ya existe un usuario registrado con este RUN o correo electrónico.');
+    } catch (e) {
+      window.alert(mensajeDeError(e));
     }
   };
 
@@ -54,6 +65,11 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="card-body p-4">
+            {desde === '/checkout' && (
+              <div className="alert alert-warning py-2 small" role="alert">
+                Inicia sesión o crea una cuenta para finalizar tu compra. Tu carrito se mantiene.
+              </div>
+            )}
             <h3 className="card-title text-center mb-4 text-warning">
               {isRegisterMode ? 'Crear Nueva Cuenta' : 'Acceso a Sonido Vivo'}
             </h3>

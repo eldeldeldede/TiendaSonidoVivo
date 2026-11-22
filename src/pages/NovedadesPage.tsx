@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { NewsCard } from '../components/molecules/CardNovedades';
-import { novedades } from '../data/novedades';
+import { listarNovedades } from '../api/novedades';
+import { useCarga } from '../hooks/useCarga';
+import { EstadoCarga } from '../components/molecules/EstadoCarga';
 import type { NewsArticle } from '../types';
 
 export const NovedadesPage: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
-  const novedadesOrdenadas = [...novedades].sort((a,b) => b.id - a.id);
+  const { datos, cargando, error, recargar } = useCarga(listarNovedades);
+  // El backend ya entrega las más recientes primero
+  const novedadesOrdenadas = datos ?? [];
+
   return (
     <StoreTemplate>
       <div className="text-center my-5">
@@ -16,6 +21,7 @@ export const NovedadesPage: React.FC = () => {
         <p className="text-white-50">Las últimas noticias, lanzamientos y guías para músicos</p>
       </div>
 
+      <EstadoCarga cargando={cargando} error={error} onReintentar={recargar}>
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
         {novedadesOrdenadas.map((art) => (
           <div key={art.id} className="col">
@@ -23,6 +29,7 @@ export const NovedadesPage: React.FC = () => {
           </div>
         ))}
       </div>
+      </EstadoCarga>
 
       {/* Modal de detalle */}
       {selectedArticle && (

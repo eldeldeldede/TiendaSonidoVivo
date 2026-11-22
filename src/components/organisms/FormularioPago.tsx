@@ -14,10 +14,11 @@ interface CheckoutFormProps {
   datosIniciales?: Partial<DatosCliente>; // si hay sesión iniciada, se autocompletan
   total: number;
   onSubmit: (cliente: DatosCliente, numeroTarjeta: string) => void;
+  procesando?: boolean; // deshabilita el botón mientras se confirma el pago
 }
 
 // Organismo: datos de envío y pago simulado
-export const CheckoutForm: React.FC<CheckoutFormProps> = ({ datosIniciales, total, onSubmit }) => {
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({ datosIniciales, total, onSubmit, procesando = false }) => {
   const [nombre, setNombre] = useState(datosIniciales?.nombre ?? '');
   const [rut, setRut] = useState(datosIniciales?.rut ?? '');
   const [email, setEmail] = useState(datosIniciales?.email ?? '');
@@ -99,8 +100,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ datosIniciales, tota
         Simulación: una tarjeta que termina en <strong>0000</strong> será rechazada.
       </p>
 
-      <Button type="submit" variant="warning" className="w-100 fw-bold py-2">
-        Pagar ${total.toLocaleString('es-CL')}
+      <Button type="submit" variant="warning" className="w-100 fw-bold py-2" disabled={procesando}>
+        {procesando ? 'Procesando pago...' : `Pagar $${total.toLocaleString('es-CL')}`}
       </Button>
     </form>
   );

@@ -1,16 +1,27 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { Badge } from '../components/atoms/Etiqueta';
 import { Button } from '../components/atoms/Button';
 import { useCart } from '../context/CartContext';
-import { obtenerProductoPorId } from '../data/productos';
+import { obtenerProducto } from '../api/productos';
+import { useCarga } from '../hooks/useCarga';
+import { EstadoCarga } from '../components/molecules/EstadoCarga';
 
 // Página de detalle: lee el id desde la URL (/producto/:id)
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
-  const producto = obtenerProductoPorId(Number(id));
+  const cargador = useCallback(() => obtenerProducto(Number(id)), [id]);
+  const { datos: producto, cargando, error, recargar } = useCarga(cargador);
+
+  if (cargando || (error && error.status !== 404)) {
+    return (
+      <StoreTemplate>
+        <EstadoCarga cargando={cargando} error={error} onReintentar={recargar}>{null}</EstadoCarga>
+      </StoreTemplate>
+    );
+  }
 
   if (!producto) {
     return (

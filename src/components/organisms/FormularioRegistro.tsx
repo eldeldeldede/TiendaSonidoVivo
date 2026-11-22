@@ -13,6 +13,12 @@ interface RegisterFormProps {
 
 const ROLES: UserRole[] = ['Cliente', 'Vendedor', 'Administrador'];
 
+const REGIONES = [
+  'Arica y Parinacota', 'Tarapacá', 'Antofagasta', 'Atacama', 'Coquimbo', 'Valparaíso',
+  'Metropolitana de Santiago', "O'Higgins", 'Maule', 'Ñuble', 'Biobío', 'La Araucanía',
+  'Los Ríos', 'Los Lagos', 'Aysén', 'Magallanes',
+];
+
 // Organismo: formulario de registro. En el login todo usuario nuevo queda como "Cliente";
 // en el panel admin se reutiliza con permitirElegirRol para crear usuarios con cualquier rol.
 export const RegisterForm: React.FC<RegisterFormProps> = ({
@@ -24,9 +30,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
-  const [confirmarPass, setConfirmarPass] = useState('');
   const [rol, setRol] = useState<UserRole>('Cliente');
+  const [direccion, setDireccion] = useState('');
+  const [comuna, setComuna] = useState('');
+  const [region, setRegion] = useState('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,26 +58,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       window.alert('El correo electrónico no tiene un formato válido');
       return;
     }
-    if (pass === '') {
-      window.alert('Debe ingresar una contraseña');
-      return;
-    }
-    if (pass.length < 8) {
-      window.alert('La contraseña debe tener mínimo 8 caracteres');
-      return;
-    }
-    if (pass !== confirmarPass) {
-      window.alert('Las contraseñas no coinciden');
-      return;
-    }
 
     onRegister({
       run: run.trim(),
       nombre: nombre.trim(),
       apellidos: apellidos.trim(),
       email: email.trim(),
-      pass,
       rol,
+      // Opcionales: si los completa, el pago se rellena solo con estos datos
+      direccion: direccion.trim() || undefined,
+      comuna: comuna.trim() || undefined,
+      region: region || undefined,
     });
   };
 
@@ -86,8 +84,25 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       </div>
       <Input id="reg-email" label="Correo Electrónico" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <Input id="reg-pass" label="Contraseña" type="password" helperText="mínimo 8 caracteres" value={pass} onChange={(e) => setPass(e.target.value)} />
-      <Input id="reg-confirmar" label="Confirmar Contraseña" type="password" value={confirmarPass} onChange={(e) => setConfirmarPass(e.target.value)} />
+      <Input id="reg-direccion" label="Dirección" helperText="opcional, para autocompletar tus compras" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+      <div className="row">
+        <div className="col-md-6">
+          <Input id="reg-comuna" label="Comuna" helperText="opcional" value={comuna} onChange={(e) => setComuna(e.target.value)} />
+        </div>
+        <div className="col-md-6">
+          <Select
+            id="reg-region"
+            label="Región"
+            options={[{ value: '', label: 'Seleccionar (opcional)' }, ...REGIONES.map((r) => ({ value: r, label: r }))]}
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="alert alert-info py-2 small" role="note">
+        <i className="bi bi-envelope-check me-1"></i>
+        Te enviaremos una contraseña temporal a este correo. La cambiarás cuando inicies sesión por primera vez.
+      </div>
       {permitirElegirRol && (
         <Select
           id="reg-rol"

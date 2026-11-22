@@ -1,20 +1,28 @@
 import React from 'react';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { ContactForm, type DatosContacto } from '../components/organisms/FormularioContacto';
-
-const servicios = [
-  { icono: 'tools', titulo: 'Reparación y mantención', texto: 'Calibración de guitarras y bajos, cambio de cuerdas, ajuste de alma y reparación de equipos de audio.' },
-  { icono: 'speaker-fill', titulo: 'Arriendo de equipos', texto: 'Amplificación, consolas e iluminación para tocatas, eventos y ensayos.' },
-  { icono: 'music-note-beamed', titulo: 'Clases', texto: 'Clases de guitarra, teclado y batería para todos los niveles con profesores de la zona.' },
-  { icono: 'headset', titulo: 'Asesoría personalizada', texto: 'Te ayudamos a elegir el instrumento o equipo ideal según tu estilo y presupuesto.' },
-];
+import { EstadoCarga } from '../components/molecules/EstadoCarga';
+import { listarServicios, enviarConsulta } from '../api/servicios';
+import { mensajeDeError } from '../api/cliente';
+import { useCarga } from '../hooks/useCarga';
+import { useAuth } from '../context/ContenidoLogin';
 
 export const ServiciosPage: React.FC = () => {
-  const guardarConsulta = (datos: DatosContacto) => {
-    const consultas = JSON.parse(localStorage.getItem('consultas_contacto') || '[]');
-    consultas.push({ ...datos, fecha: new Date().toLocaleString('es-CL') });
-    localStorage.setItem('consultas_contacto', JSON.stringify(consultas));
-    window.alert('¡Mensaje enviado con éxito! Te responderemos a la brevedad.');
+  const { currentUser } = useAuth();
+  const { datos, cargando, error, recargar } = useCarga(listarServicios);
+  const servicios = datos ?? [];
+
+  const guardarConsulta = async (datos: DatosContacto) => {
+    try {
+      await enviarConsulta(datos);
+      window.alert(
+        currentUser
+          ? '¡Mensaje enviado con éxito! Verás la respuesta en "Mis consultas".'
+          : '¡Mensaje enviado con éxito! Te responderemos a la brevedad.'
+      );
+    } catch (e) {
+      window.alert(mensajeDeError(e));
+    }
   };
 
   return (
@@ -30,9 +38,10 @@ export const ServiciosPage: React.FC = () => {
       </section>
 
       {/* Tarjetas de servicios */}
+      <EstadoCarga cargando={cargando} error={error} onReintentar={recargar}>
       <section className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-5">
         {servicios.map((s) => (
-          <div className="col" key={s.titulo}>
+          <div className="col" key={s.id}>
             <div className="card h-100 bg-dark text-white border-secondary text-center p-3">
               <i className={`bi bi-${s.icono} text-warning fs-1 mb-2`}></i>
               <h5 className="fw-bold">{s.titulo}</h5>
@@ -41,6 +50,7 @@ export const ServiciosPage: React.FC = () => {
           </div>
         ))}
       </section>
+      </EstadoCarga>
 
       {/* Contacto */}
       <section className="row g-4 align-items-stretch mb-5">

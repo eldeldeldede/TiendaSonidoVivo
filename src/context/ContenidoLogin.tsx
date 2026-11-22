@@ -1,104 +1,61 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User, UserRole   } from '../types';
+import type { User } from '../types';
+import { iniciarSesion, registrarCliente } from '../api/usuarios';
+import { CLAVE_SESION, EVENTO_SESION_EXPIRADA } from '../api/cliente';
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, pass: string) => boolean;
-  register: (newUser: User) => boolean;
+  // Validan contra UsuarioMicroservicio. Lanzan ApiError si las credenciales o los datos no son válidos.
+  login: (email: string, pass: string) => Promise<User>;
+  register: (newUser: User) => Promise<User>;
   logout: () => void;
-  users: User[];
-  cambiarRol: (run: string, nuevoRol: UserRole) => void;
-
+  // Actualiza la sesión local (ej. si un administrador cambia su propio rol)
+  actualizarSesion: (usuario: User) => void;
 }
-
-const defaultUsers: User[] = [
-  {
-    run: '11111111-1',
-    nombre: 'Admin',
-    apellidos: 'Sonido Vivo',
-    email: 'admin@sonidovivo.cl',
-    pass: 'admin123',
-    rol: 'Administrador'
-  },
-  {
-    run: '22222222-2',
-    nombre: 'Juan',
-    apellidos: 'Pérez',
-    email: 'cliente@sonidovivo.cl',
-    pass: 'user123',
-    rol: 'Cliente'
-  }
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('usuarios_sonidovivo');
-    if (saved) {
-      try {
-        const parsed: User[] = JSON.parse(saved);
-        const hasValidAdmin = parsed.some(
-          (u) => u.email === 'admin@sonidovivo.cl' && u.pass === 'admin123'
-        );
-        if (hasValidAdmin) return parsed;
-      } catch (e) {
-        console.error('Error al cargar usuarios:', e);
-      }
-    }
-    localStorage.setItem('usuarios_sonidovivo', JSON.stringify(defaultUsers));
-    return defaultUsers;
-  });
-
+  // Solo la sesión se recuerda en el navegador; los usuarios viven en el backend
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('sesion_sonidovivo');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const guardada = localStorage.getItem(CLAVE_SESION);
+    if (!guardada) return null;
+    try {
+      return JSON.parse(guardada) as User;
+    } catch {
+      return null;
+    }
   });
-
-  useEffect(() => {
-    localStorage.setItem('usuarios_sonidovivo', JSON.stringify(users));
-  }, [users]);
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('sesion_sonidovivo', JSON.stringify(currentUser));
+      localStorage.setItem(CLAVE_SESION, JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem('sesion_sonidovivo');
+      localStorage.removeItem(CLAVE_SESION);
     }
   }, [currentUser]);
 
-  const login = (email: string, pass: string): boolean => {
-    const found = users.find(
-      (u) => u.email.trim().toLowerCase() === email.trim().toLowerCase() && u.pass === pass
-    );
-    if (found) {
-      setCurrentUser(found);
-      return true;
-    }
-    return false;
+  // Si el backend rechaza el token (venció), se cierra la sesión
+  useEffect(() => {
+    const cerrar = () => setCurrentUser(null);
+    window.addEventListener(EVENTO_SESION_EXPIRADA, cerrar);
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, cerrar);
+  }, []);
+
+  const login = async (email: string, pass: string): Promise<User> => {
+    const usuario = await iniciarSesion(email, pass);
+    setCurrentUser(usuario);
+    return usuario;
   };
 
-  const register = (newUser: User): boolean => {
-    const exists = users.some(
-      (u) => u.email.trim().toLowerCase() === newUser.email.trim().toLowerCase() || u.run === newUser.run
-    );
-    if (exists) return false;
-
-    setUsers((prev) => [...prev, newUser]);
-    return true;
-  };
+  const register = (newUser: User): Promise<User> => registrarCliente(newUser);
 
   const logout = () => {
     setCurrentUser(null);
   };
 
-   const cambiarRol = (run: string, nuevoRol: UserRole) => {
-    setUsers((prev) => prev.map((u) => (u.run === run ? { ...u, rol: nuevoRol } : u)));
-    setCurrentUser((actual) => (actual && actual.run === run ? { ...actual, rol: nuevoRol } : actual));
-  };
-
   return (
-    <AuthContext.Provider value={{ currentUser, login, register, logout, users, cambiarRol }}>
+    <AuthContext.Provider value={{ currentUser, login, register, logout, actualizarSesion: setCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );

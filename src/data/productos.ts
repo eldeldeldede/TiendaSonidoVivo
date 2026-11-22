@@ -1,92 +1,7 @@
 import type { Product } from '../types';
 
-// Módulo de datos: actúa como una base de datos simulada de productos.
-// Los datos se guardan en localStorage para que los cambios hechos desde
-// el panel de administración se mantengan al recargar la página.
-
-const CLAVE_STORAGE = 'productos_sonidovivo';
-
-export const productosIniciales: Product[] = [
- { id: 1, nombre: 'Guitarra Eléctrica Fender Stratocaster', categoria: 'Guitarras', precio: 750000, stock: 5, img: 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?auto=format&fit=crop&w=400&q=80' },
- { id: 2, nombre: 'Teclado Roland XPS-10', categoria: 'Teclados', precio: 620000, stock: 2, img: 'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=400&q=80' },
- { id: 3, nombre: 'Batería Acústica Pearl Roadshow', categoria: 'Baterías', precio: 580000, stock: 0, img: 'https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?auto=format&fit=crop&w=400&q=80' },
- { id: 4, nombre: 'Pedal de Efectos Boss DS-1', categoria: 'Accesorios', precio: 85000, stock: 12, img: 'https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?auto=format&fit=crop&w=400&q=80' },
- { id: 5, nombre: 'Guitarra Acústica Yamaha F310', categoria: 'Guitarras', precio: 159990, stock: 8, img: 'https://images.unsplash.com/photo-1588690224648-20426ab6274a?auto=format&fit=crop&w=400&q=80' },
- { id: 6, nombre: 'Bajo Eléctrico Ibanez GSR200', categoria: 'Guitarras', precio: 289990, stock: 4, img: 'https://images.unsplash.com/photo-1727035305536-e027445c24e3?auto=format&fit=crop&w=400&q=80' },
- { id: 7, nombre: 'Teclado Casio CT-S300', categoria: 'Teclados', precio: 149990, stock: 6, img: 'https://images.unsplash.com/photo-1534170106611-6b85b35795f5?auto=format&fit=crop&w=400&q=80' },
- { id: 8, nombre: 'Piano Digital Yamaha P-145', categoria: 'Teclados', precio: 549990, stock: 3, img: 'https://images.unsplash.com/photo-1567787609897-efa3625dd22d?auto=format&fit=crop&w=400&q=80' },
- { id: 9, nombre: 'Batería Electrónica Alesis Nitro Max', categoria: 'Baterías', precio: 449990, stock: 2, img: 'https://images.unsplash.com/photo-1457523054379-8d03ab9fc2aa?auto=format&fit=crop&w=400&q=80' },
- { id: 10, nombre: 'Amplificador Marshall MG15G', categoria: 'Audio', precio: 129990, stock: 7, img: 'https://images.unsplash.com/photo-1534797993987-4a363509bc52?auto=format&fit=crop&w=400&q=80' },
- { id: 11, nombre: 'Micrófono Shure SM58', categoria: 'Audio', precio: 119990, stock: 10, img: 'https://images.unsplash.com/photo-1543062591-e3c0fdb97350?auto=format&fit=crop&w=400&q=80' },
- { id: 12, nombre: 'Cuerdas Ernie Ball Regular Slinky', categoria: 'Accesorios', precio: 9990, stock: 40, img: 'https://images.unsplash.com/photo-1681059840890-230a07b85448?auto=format&fit=crop&w=400&q=80' },
- { id: 13, nombre: 'Ukelele Concierto Kala KA-C', categoria: 'Guitarras', precio: 79990, stock: 9, img: 'https://images.unsplash.com/photo-1577281747309-25bdad8b7cc0?auto=format&fit=crop&w=400&q=80' },
- { id: 14, nombre: 'Audífonos de Estudio Audio-Technica ATH-M50x', categoria: 'Audio', precio: 169990, stock: 5, img: 'https://images.unsplash.com/photo-1737885197946-6d9d79dade89?auto=format&fit=crop&w=400&q=80' },
- { id: 15, nombre: 'Baquetas Vic Firth 5A', categoria: 'Accesorios', precio: 14990, stock: 30, img: 'https://images.unsplash.com/photo-1602001373676-64e1598dbc6a?auto=format&fit=crop&w=400&q=80' },
- { id: 16, nombre: 'Sintetizador Korg Minilogue XD', categoria: 'Teclados', precio: 699990, stock: 1, img: 'https://images.unsplash.com/photo-1642784323419-89d08b21c4de?auto=format&fit=crop&w=400&q=80' }
-];
-
-// ---------- Funciones internas ----------
-
-function guardar(productos: Product[]): void {
-  localStorage.setItem(CLAVE_STORAGE, JSON.stringify(productos));
-}
-
-function leer(): Product[] {
-  const guardados = localStorage.getItem(CLAVE_STORAGE);
-  if (!guardados) {
-    guardar(productosIniciales);
-    return [...productosIniciales];
-  }
-  try {
-    return JSON.parse(guardados) as Product[];
-  } catch {
-    guardar(productosIniciales);
-    return [...productosIniciales];
-  }
-}
-
-// ---------- CRUD ----------
-
-// Leer: todos los productos
-export function obtenerProductos(): Product[] {
-  return leer();
-}
-
-// Leer: un producto por su id (undefined si no existe)
-export function obtenerProductoPorId(id: number): Product | undefined {
-  return leer().find((p) => p.id === id);
-}
-
-// Crear: recibe los datos sin id, le asigna el siguiente id disponible
-export function crearProducto(datos: Omit<Product, 'id'>): Product {
-  const productos = leer();
-  const siguienteId = productos.length > 0 ? Math.max(...productos.map((p) => p.id)) + 1 : 1;
-  const nuevo: Product = { id: siguienteId, ...datos };
-  guardar([...productos, nuevo]);
-  return nuevo;
-}
-
-// Actualizar: modifica solo los campos enviados. Devuelve undefined si no existe.
-export function actualizarProducto(id: number, cambios: Partial<Omit<Product, 'id'>>): Product | undefined {
-  const productos = leer();
-  const existente = productos.find((p) => p.id === id);
-  if (!existente) return undefined;
-
-  const actualizado: Product = { ...existente, ...cambios };
-  guardar(productos.map((p) => (p.id === id ? actualizado : p)));
-  return actualizado;
-}
-
-// Eliminar: devuelve true si se eliminó, false si no existía
-export function eliminarProducto(id: number): boolean {
-  const productos = leer();
-  const restantes = productos.filter((p) => p.id !== id);
-  if (restantes.length === productos.length) return false;
-  guardar(restantes);
-  return true;
-}
-
-// ---------- Filtros ----------
+// Los productos viven en ProductoMicroservicio (ver src/api/productos.ts).
+// Aquí quedan solo las funciones puras de filtrado que usa el catálogo.
 
 // Lista de categorías sin repetir
 export function obtenerCategorias(productos: Product[]): string[] {
@@ -101,9 +16,4 @@ export function filtrarProductos(productos: Product[], texto: string, categoria:
     const coincideCategoria = categoria === 'todas' || p.categoria === categoria;
     return coincideNombre && coincideCategoria;
   });
-}
-
-// Vuelve a los productos iniciales (útil para las pruebas)
-export function reiniciarProductos(): void {
-  guardar(productosIniciales);
 }

@@ -1,19 +1,25 @@
 // [CAMBIO] Se importó 'useState' para manejar mensajes de error en pantalla si falta stock
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { CheckoutForm } from '../components/organisms/FormularioPago';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/ContenidoLogin';
-import { calcularTotales, crearPedido, simularPago, type DatosCliente } from '../data/pedidos';
+import { calcularTotales, type DatosCliente } from '../data/pedidos';
+import { pagarCarrito } from '../api/ventas';
+import { obtenerPedido } from '../api/pedidos';
+import { actualizarUsuario } from '../api/usuarios';
+import { ApiError, mensajeDeError } from '../api/cliente';
+import type { Order } from '../types';
 
 export const CheckoutPage: React.FC = () => {
   const { cart, clearCart } = useCart();
-  const { currentUser } = useAuth();
+  const { currentUser, actualizarSesion } = useAuth();
   const navigate = useNavigate();
   
   // [CAMBIO] Nuevo estado para guardar el texto de alerta si algún producto supera el stock
   const [errorStock, setErrorStock] = useState<string | null>(null);
+  const [procesando, setProcesando] = useState(false);
 
   const { neto, iva, total } = calcularTotales(cart);
 
@@ -22,11 +28,11 @@ export const CheckoutPage: React.FC = () => {
         nombre: currentUser.apellidos ? `${currentUser.nombre} ${currentUser.apellidos}` : currentUser.nombre,
         rut: currentUser.run,
         email: currentUser.email,
-        direccion: currentUser.direccion ?? '',
+        direccion: [currentUser.direccion, currentUser.comuna, currentUser.region].filter(Boolean).join(', '),
       }
     : undefined;
 
-  const pagar = (cliente: DatosCliente, numeroTarjeta: string) => {
+  const pagar = async (cliente: DatosCliente, numeroTarjeta: string) => {
     // [CAMBIO] Limpia errores anteriores cada vez que el usuario intenta pagar
     setErrorStock(null);
 
@@ -40,14 +46,53 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (!simularPago(numeroTarjeta)) {
-      navigate('/compra/error');
-      return;
+    // El backend valida stock, procesa el pago (simulado) y crea el pedido.
+    // Si la tarjeta es rechazada responde 402.
+    setProcesando(true);
+    try {
+      const venta = await pagarCarrito(
+        {
+          clienteNombre: cliente.nombre,
+          rut: cliente.rut,
+          email: cliente.email,
+          direccion: cliente.direccion,
+          numeroTarjeta,
+        },
+        cart
+      );
+      // Si la cuenta aún no tiene dirección, se guarda la de esta compra para autocompletar las próximas
+      if (currentUser?.id && !currentUser.direccion && cliente.direccion.trim() !== '') {
+        const conDireccion = { ...currentUser, direccion: cliente.direccion.trim() };
+        actualizarUsuario(currentUser.id, conDireccion)
+          .then(() => actualizarSesion(conDireccion))
+          .catch(() => undefined); // no es crítico: la compra ya se hizo
+      }
+      // El pago ya se realizó: se vacía el carrito aunque falle la consulta de la boleta
+      const itemsComprados = cart;
+      clearCart();
+      const pedido = await obtenerPedido(venta.pedidoCodigo).catch(
+        (): Order => ({
+          id: venta.pedidoCodigo,
+          cliente: cliente.nombre,
+          rut: cliente.rut,
+          email: cliente.email,
+          direccion: cliente.direccion,
+          fecha: new Date().toISOString().slice(0, 10),
+          estado: 'En Preparación',
+          items: itemsComprados,
+          ...calcularTotales(itemsComprados),
+        })
+      );
+      navigate('/compra/exitosa', { state: { pedido } });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 402) {
+        navigate('/compra/error');
+        return;
+      }
+      setErrorStock(mensajeDeError(e));
+    } finally {
+      setProcesando(false);
     }
-
-    const pedido = crearPedido(cliente, cart);
-    clearCart();
-    navigate('/compra/exitosa', { state: { pedido } });
   };
 
   if (cart.length === 0) {
@@ -60,6 +105,11 @@ export const CheckoutPage: React.FC = () => {
         </div>
       </StoreTemplate>
     );
+  }
+
+  // Para pagar hay que iniciar sesión: el carrito se conserva y al volver se retoma el pago
+  if (!currentUser) {
+    return <Navigate to="/login" replace state={{ desde: '/checkout' }} />;
   }
 
   return (
@@ -76,7 +126,7 @@ export const CheckoutPage: React.FC = () => {
       <div className="row g-4">
         <div className="col-lg-7">
           <div className="card bg-dark text-white border-secondary p-4">
-            <CheckoutForm datosIniciales={datosIniciales} total={total} onSubmit={pagar} />
+            <CheckoutForm datosIniciales={datosIniciales} total={total} onSubmit={pagar} procesando={procesando} />
           </div>
         </div>
 
