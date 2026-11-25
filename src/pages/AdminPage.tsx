@@ -257,14 +257,14 @@ export const AdminPage: React.FC = () => {
           <div className="card border-0 shadow-sm p-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="mb-0">Inventario de Productos</h5>
-              {!mostrarFormulario && (
+              {esAdmin && !mostrarFormulario && (
                 <Button variant="primary" onClick={abrirNuevo}>
                   + Nuevo producto
                 </Button>
               )}
             </div>
 
-            {mostrarFormulario && (
+            {esAdmin && mostrarFormulario && (
               <div className="border rounded p-3 mb-4 bg-white">
                 {/* key: reinicia el formulario al cambiar entre "nuevo" y "editar" */}
                 <ProductForm
@@ -277,7 +277,7 @@ export const AdminPage: React.FC = () => {
             )}
 
             <EstadoCarga cargando={productos.cargando && !productos.datos} error={productos.error} onReintentar={productos.recargar}>
-              <ProductTable products={productos.datos ?? []} onEdit={abrirEdicion} onDelete={borrarProducto} />
+              <ProductTable products={productos.datos ?? []} onEdit={esAdmin ? abrirEdicion : undefined} onDelete={esAdmin ? borrarProducto : undefined} />
             </EstadoCarga>
           </div>
         )}

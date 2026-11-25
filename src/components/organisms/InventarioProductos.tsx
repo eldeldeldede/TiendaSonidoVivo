@@ -5,12 +5,15 @@ import { Button } from '../atoms/Button';
 
 interface ProductTableProps {
   products: Product[];
-  onEdit: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  // Acciones opcionales: cada botón se muestra solo si viene su función
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
-// Organismo: tabla de inventario con acciones de editar y eliminar
+// Organismo: tabla de inventario; sin acciones queda en modo solo lectura
 export const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, onDelete }) => {
+  const hayAcciones = Boolean(onEdit || onDelete);
+
   return (
     <div className="table-responsive">
       <table className="table table-hover align-middle">
@@ -21,13 +24,13 @@ export const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, on
             <th>Categoría</th>
             <th>Precio</th>
             <th>Stock</th>
-            <th>Acciones</th>
+            {hayAcciones && <th>Acciones</th>}
           </tr>
         </thead>
         <tbody>
           {products.length === 0 ? (
             <tr>
-              <td colSpan={6} className="text-center text-muted py-3">
+              <td colSpan={hayAcciones ? 6 : 5} className="text-center text-muted py-3">
                 No hay productos en inventario
               </td>
             </tr>
@@ -43,16 +46,22 @@ export const ProductTable: React.FC<ProductTableProps> = ({ products, onEdit, on
                     {p.stock > 0 ? `${p.stock} unidades` : 'Sin stock'}
                   </Badge>
                 </td>
-                <td>
-                  <div className="d-flex gap-2">
-                    <Button size="sm" variant="outline-primary" onClick={() => onEdit(p)}>
-                      Editar
-                    </Button>
-                    <Button size="sm" variant="outline-danger" onClick={() => onDelete(p)}>
-                      Eliminar
-                    </Button>
-                  </div>
-                </td>
+                {hayAcciones && (
+                  <td>
+                    <div className="d-flex gap-2">
+                      {onEdit && (
+                        <Button size="sm" variant="outline-primary" onClick={() => onEdit(p)}>
+                          Editar
+                        </Button>
+                      )}
+                      {onDelete && (
+                        <Button size="sm" variant="outline-danger" onClick={() => onDelete(p)}>
+                          Eliminar
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             ))
           )}
