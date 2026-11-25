@@ -19,9 +19,10 @@ import { CambiarContrasenaPage } from './pages/CambiarContrasenaPage';
 
 const ProtectedAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
-  if (!currentUser || !['Administrador', 'Vendedor'].includes(currentUser.rol)) {
-    return <Navigate to="/login" replace />;
-  }
+  // Sin sesión: al login, y después de entrar vuelve al panel
+  if (!currentUser) return <Navigate to="/login" replace state={{ desde: '/admin' }} />;
+  // Con sesión pero sin un rol permitido (Cliente): vuelve al inicio, sin pasar por el login
+  if (!['Administrador', 'Vendedor'].includes(currentUser.rol)) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 

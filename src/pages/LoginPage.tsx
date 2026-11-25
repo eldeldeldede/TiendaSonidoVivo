@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { StoreTemplate } from '../components/templates/PlantillaTienda';
 import { LoginForm } from '../components/organisms/FormularioLogin';
 import { RegisterForm } from '../components/organisms/FormularioRegistro';
@@ -9,10 +9,16 @@ import { mensajeDeError } from '../api/cliente';
 
 export const LoginPage: React.FC = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, currentUser } = useAuth();
   const navigate = useNavigate();
   // Si llegó desde el pago, después de iniciar sesión vuelve ahí (el carrito se conserva)
   const desde = (useLocation().state as { desde?: string } | null)?.desde;
+
+  // Con la sesión ya iniciada no tiene sentido volver a mostrar el formulario:
+  // para entrar con otra cuenta primero hay que cerrar sesión
+  if (currentUser && !currentUser.debeCambiarContrasena) {
+    return <Navigate to={desde ?? '/'} replace />;
+  }
 
   const handleLogin = async (email: string, pass: string) => {
     try {
