@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '../types';
-import { iniciarSesion, registrarCliente } from '../api/usuarios';
+import { iniciarSesion, registrarCliente, renovarToken } from '../api/usuarios';
 import { CLAVE_SESION, EVENTO_SESION_EXPIRADA } from '../api/cliente';
+import { tokenVencido, vencimientoToken } from '../utils/token';
+
+// El token se renueva 5 minutos antes de vencer, para que la sesión no se corte mientras se usa la tienda
+const MARGEN_RENOVACION_MS = 5 * 60 * 1000;
 
 interface AuthContextType {
   currentUser: User | null;
@@ -21,7 +25,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const guardada = localStorage.getItem(CLAVE_SESION);
     if (!guardada) return null;
     try {
-      return JSON.parse(guardada) as User;
+      const usuario = JSON.parse(guardada) as User;
+      // Al recargar la página, una sesión con el token ya vencido no se restaura
+      return tokenVencido(usuario.token) ? null : usuario;
     } catch {
       return null;
     }
@@ -41,6 +47,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.addEventListener(EVENTO_SESION_EXPIRADA, cerrar);
     return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, cerrar);
   }, []);
+
+  // Renovación automática del JWT: se programa según el vencimiento del token actual.
+  // Cada renovación entrega un token nuevo, lo que vuelve a ejecutar este efecto y programa la siguiente.
+  const token = currentUser?.token;
+  const debeCambiar = currentUser?.debeCambiarContrasena === true;
+  useEffect(() => {
+    const vence = vencimientoToken(token);
+    // Sin token legible, o con contraseña temporal (el backend no permite renovar en ese caso), no se programa nada
+    if (!token || vence === null || debeCambiar) return;
+
+    let cancelado = false;
+    let cierre: number | undefined;
+    const espera = Math.max(vence - Date.now() - MARGEN_RENOVACION_MS, 0);
+
+    const renovacion = window.setTimeout(async () => {
+      try {
+        const renovado = await renovarToken();
+        if (!cancelado) setCurrentUser(renovado); // trae también el rol actual de la cuenta
+      } catch {
+        // Si fue un 401 el cliente HTTP ya avisó que la sesión expiró. Si el servidor no respondió,
+        // la sesión se cierra cuando el token venza, porque después de eso ya no sirve.
+        if (!cancelado) cierre = window.setTimeout(() => setCurrentUser(null), Math.max(vence - Date.now(), 0));
+      }
+    }, espera);
+
+    return () => {
+      cancelado = true;
+      window.clearTimeout(renovacion);
+      if (cierre !== undefined) window.clearTimeout(cierre);
+    };
+  }, [token, debeCambiar]);
 
   const login = async (email: string, pass: string): Promise<User> => {
     const usuario = await iniciarSesion(email, pass);

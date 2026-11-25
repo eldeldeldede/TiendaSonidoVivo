@@ -51,6 +51,11 @@ const aSolicitud = (u: User, rolId?: number) => ({
 export const iniciarSesion = async (email: string, pass: string): Promise<User> =>
   desdeApi(await peticion<UsuarioApi>('/api/usuarios/login', { method: 'POST', cuerpo: { correo: email, contrasena: pass } }));
 
+// Renovación del JWT: con el token vigente (lo agrega el cliente HTTP) el backend entrega uno nuevo
+// con el vencimiento renovado y el rol actual de la cuenta
+export const renovarToken = async (): Promise<User> =>
+  desdeApi(await peticion<UsuarioApi>('/api/usuarios/renovar-token', { method: 'POST' }));
+
 // Registro público: el backend siempre crea el usuario con rol Cliente y le envía la contraseña por correo
 export const registrarCliente = async (usuario: User): Promise<User> =>
   desdeApi(await peticion<UsuarioApi>('/api/usuarios/registro', { method: 'POST', cuerpo: aSolicitud(usuario) }));
