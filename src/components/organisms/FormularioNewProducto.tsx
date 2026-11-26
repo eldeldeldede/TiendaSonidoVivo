@@ -13,7 +13,7 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-const CATEGORIAS = ['Guitarras', 'Teclados', 'Baterías', 'Accesorios', 'Audio'];
+const CATEGORIAS = ['Instrumentos de cuerda', 'Teclados', 'Baterías', 'Accesorios', 'Audio'];
 const IMAGEN_POR_DEFECTO = 'https://placehold.co/400x200?text=Sonido+Vivo';
 
 // Organismo: formulario para crear o editar un producto

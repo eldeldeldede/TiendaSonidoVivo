@@ -29,7 +29,7 @@ describe('ProductForm', () => {
     render(<ProductForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
 
     escribir('Nombre', 'Bajo Ibanez');
-    escribir('Categoría', 'Guitarras');
+    escribir('Categoría', 'Instrumentos de cuerda');
     escribir('Precio', '-500');
     fireEvent.click(screen.getByRole('button', { name: 'Crear producto' }));
 
@@ -41,20 +41,20 @@ describe('ProductForm', () => {
     render(<ProductForm onSubmit={alGuardar} onCancel={vi.fn()} />);
 
     escribir('Nombre', 'Bajo Ibanez');
-    escribir('Categoría', 'Guitarras');
+    escribir('Categoría', 'Instrumentos de cuerda');
     escribir('Precio', '320000');
     escribir('Stock', '4');
     fireEvent.click(screen.getByRole('button', { name: 'Crear producto' }));
 
     expect(alGuardar).toHaveBeenCalledWith(
-      expect.objectContaining({ nombre: 'Bajo Ibanez', categoria: 'Guitarras', precio: 320000, stock: 4 })
+      expect.objectContaining({ nombre: 'Bajo Ibanez', categoria: 'Instrumentos de cuerda', precio: 320000, stock: 4 })
     );
   });
 
   it('en modo edición muestra los datos actuales del producto', () => {
     render(
       <ProductForm
-        initialData={{ id: 1, nombre: 'Guitarra X', categoria: 'Guitarras', precio: 1000, stock: 2, img: '' }}
+        initialData={{ id: 1, nombre: 'Guitarra X', categoria: 'Instrumentos de cuerda', precio: 1000, stock: 2, img: '' }}
         onSubmit={vi.fn()}
         onCancel={vi.fn()}
       />
